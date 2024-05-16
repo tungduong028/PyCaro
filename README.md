@@ -29,7 +29,7 @@ Bạn có thể clone project bằng link hoặc download zip:
 ### Bước 2: Nhập IP đó vào trong client.py ở vị trí sau:
 ![image](https://github.com/tungduong028/PyCaro/assets/97148539/dc6d9d16-d2e1-4373-9238-0a3b396cd3a5)
 
-### Bước 3: Chạy file server.py trên terminal ( chỉ cần chạy trên 1 máy tùy ý)
+### Bước 3: Chạy file server.py trên terminal ( chỉ cần chạy trên máy mà bạn xem IP)
 
 ### Bước 4: Chạy file client.py trên terminal ở lần lượt 2 máy
 
