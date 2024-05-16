@@ -17,10 +17,7 @@ Trước tiên, bạn cần cài đặt Python. Bạn có thể tải Python t�
 ### Bước 2: Cài đặt thư viện Tkinter
 Tkinter là thư viện GUI mặc định của Python, thường đã được cài sẵn trên Windows. Đối với các hệ điều hành khác, bạn có thể cần tìm lệnh để cài đặt
 
-### Bước 3: Clone project về máy
-Bạn có thể clone project bằng link hoặc download zip:
-![image](https://github.com/tungduong028/PyCaro/assets/97148539/ba0088a4-cb24-4a6d-a575-10dd3e7b8da9)
-
+### Bước 3: Lấy project về máy
 
 ## Hướng dẫn chạy game
 
