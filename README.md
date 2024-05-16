@@ -24,7 +24,7 @@ Tkinter là thư viện GUI mặc định của Python, thường đã được 
 ### Bước 1: Xem IP của mạng internet mà máy đang dùng
 
 ### Bước 2: Nhập IP đó vào trong client.py ở vị trí sau:
-![image](https://github.com/tungduong028/PyCaro/assets/97148539/dc6d9d16-d2e1-4373-9238-0a3b396cd3a5)
+![image](https://github.com/tungduong028/PyCaro/assets/97148539/13361b27-b75c-48da-a4b1-ed26083c4a82)
 
 ### Bước 3: Chạy file server.py trên terminal ( chỉ cần chạy trên máy mà bạn xem IP)
 
