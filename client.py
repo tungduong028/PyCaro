@@ -1,10 +1,12 @@
 import threading
 import tkinter as tk
 import socket
+
 # Kích thước bảng caro
 BOARD_SIZE = 15
 both_connected = False
 both_connected_lock = threading.Lock()  # Khóa để đồng bộ truy cập vào both_connected
+current_border_id = None
 
 def create_board(size):
     return [[' ' for _ in range(size)] for _ in range(size)]
@@ -61,20 +63,23 @@ def draw_board():
     canvas.bind("<Button-1>", lambda event: on_click(event))
 
 def on_click(event):
-    global my_turn, game_over, symbol, both_connected
+    global my_turn, game_over, symbol, both_connected, current_border_id
     print(f"both_connected: {both_connected}, my_turn: {my_turn}, game_over: {game_over}")
-    
+
     with both_connected_lock:
         if not both_connected:  # Kiểm tra nếu cả hai người chơi chưa kết nối
             label.config(text="Waiting for opponent to connect...")
             return
-    
+
     if not my_turn or game_over:
         return
     col = event.x // 40
     row = event.y // 40
     if board[row][col] == ' ':
-        draw_move(row, col, symbol,"blue")
+        if current_border_id:
+            canvas.delete(current_border_id)
+        draw_move(row, col, symbol, "blue")
+        current_border_id = draw_border(row, col)
         board[row][col] = symbol
         if check_win(board, row, col, symbol):
             label.config(text=f"Player {symbol} wins!")
@@ -89,7 +94,14 @@ def on_click(event):
 def draw_move(row, col, symbol, color):
     x = col * 40 + 20
     y = row * 40 + 20
-    canvas.create_text(x, y, text=symbol, font=('Helvetica', 20, 'bold'), fill=color),
+    return canvas.create_text(x, y, text=symbol, font=('Helvetica', 20, 'bold'), fill=color),
+
+def draw_border(row, col):
+    x1 = col * 40
+    y1 = row * 40
+    x2 = (col + 1) * 40
+    y2 = (row + 1) * 40
+    return canvas.create_rectangle(x1, y1, x2, y2, outline="red", width=2)
 
 def send_data(data):
     try:
@@ -100,24 +112,26 @@ def send_data(data):
         pass
 
 def receive_data():
-    global my_turn, game_over, symbol, opponent_symbol, both_connected
+    global my_turn, game_over, symbol, opponent_symbol, both_connected, current_border_id
     while True:
         try:
-            data = client_socket.recv(1024).decode('utf-8') 
-            # print(f"[RECEIVED] {data}")
+            data = client_socket.recv(1024).decode('utf-8')
             if data.startswith("SYMBOL"):
                 symbol = data[6]
-                if symbol=="O":
-                    both_connected=True
+                if symbol == "O":
+                    both_connected = True
                     chat_entry.config(state=tk.NORMAL)
                 opponent_symbol = 'O' if symbol == 'X' else 'X'
                 my_turn = (symbol == 'X')
-                label.config(text="Your turnnnn" if my_turn else "Waiting for opponent...")
+                label.config(text="Your turn" if my_turn else "Waiting for opponent...")
             elif data.startswith("MOVE"):
                 row = int(data[4:6])
                 col = int(data[6:8])
                 board[row][col] = opponent_symbol
                 draw_move(row, col, opponent_symbol, "red")
+                if current_border_id:
+                    canvas.delete(current_border_id)
+                current_border_id = draw_border(row, col)
                 if check_win(board, row, col, opponent_symbol):
                     label.config(text=f"Player {opponent_symbol} wins!")
                     game_over = True
@@ -137,7 +151,6 @@ def receive_data():
             elif data.startswith("START"):
                 with both_connected_lock:
                     both_connected = True  # Cập nhật trạng thái khi cả hai người chơi đã kết nối
-                print("Both players are now connected. Chat enabled and game can start.")
                 chat_entry.config(state=tk.NORMAL)  # Bật chức năng chat
                 label.config(text="Both players connected. You can start chatting!")
         except ConnectionResetError:
@@ -145,7 +158,7 @@ def receive_data():
             break
 
 def reset_game():
-    global board, my_turn, game_over
+    global board, my_turn, game_over, current_border_id
     board = create_board(BOARD_SIZE)
     canvas.delete("all")
     draw_board()
@@ -153,6 +166,7 @@ def reset_game():
     my_turn = (symbol == 'X')
     label.config(text="Your turn" if my_turn else "Waiting for opponent...")
     reset_button.pack_forget()  # Hide reset button
+    current_border_id = None
 
 def on_reset_click():
     send_data("RESET")
