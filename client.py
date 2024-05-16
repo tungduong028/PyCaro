@@ -74,7 +74,7 @@ def on_click(event):
     col = event.x // 40
     row = event.y // 40
     if board[row][col] == ' ':
-        draw_move(row, col, symbol)
+        draw_move(row, col, symbol,"blue")
         board[row][col] = symbol
         if check_win(board, row, col, symbol):
             label.config(text=f"Player {symbol} wins!")
@@ -86,10 +86,10 @@ def on_click(event):
             my_turn = False
             label.config(text="Waiting for opponent...")
 
-def draw_move(row, col, symbol):
+def draw_move(row, col, symbol, color):
     x = col * 40 + 20
     y = row * 40 + 20
-    canvas.create_text(x, y, text=symbol, font=('Helvetica', 20, 'bold'))
+    canvas.create_text(x, y, text=symbol, font=('Helvetica', 20, 'bold'), fill=color),
 
 def send_data(data):
     try:
@@ -103,10 +103,13 @@ def receive_data():
     global my_turn, game_over, symbol, opponent_symbol, both_connected
     while True:
         try:
-            data = client_socket.recv(1024).decode('utf-8')
-            print(f"[RECEIVED] {data}")
+            data = client_socket.recv(1024).decode('utf-8') 
+            # print(f"[RECEIVED] {data}")
             if data.startswith("SYMBOL"):
                 symbol = data[6]
+                if symbol=="O":
+                    both_connected=True
+                    chat_entry.config(state=tk.NORMAL)
                 opponent_symbol = 'O' if symbol == 'X' else 'X'
                 my_turn = (symbol == 'X')
                 label.config(text="Your turnnnn" if my_turn else "Waiting for opponent...")
@@ -114,7 +117,7 @@ def receive_data():
                 row = int(data[4:6])
                 col = int(data[6:8])
                 board[row][col] = opponent_symbol
-                draw_move(row, col, opponent_symbol)
+                draw_move(row, col, opponent_symbol, "red")
                 if check_win(board, row, col, opponent_symbol):
                     label.config(text=f"Player {opponent_symbol} wins!")
                     game_over = True
@@ -192,7 +195,7 @@ chat_entry.config(state=tk.DISABLED)
 
 try:
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client_socket.connect(("192.168.195.34", 12345))  # Nhập địa chỉ IP của server, nếu chạy cùng 1 máy có thể dùng 127.0.0.1
+    client_socket.connect(("127.0.0.1", 12345))  # Nhập địa chỉ IP của server, nếu chạy cùng 1 máy có thể dùng 127.0.0.1
 except ConnectionRefusedError:
     label.config(text="Failed to connect to server")
     print("[ERROR] Failed to connect to server")
